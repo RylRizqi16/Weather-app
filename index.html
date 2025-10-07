@@ -1,175 +1,342 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .weather-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .weather-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .search-btn {
-            background-color: #764ba2;
-            transition: background-color 0.3s ease;
-        }
-        .search-btn:hover {
-            background-color: #667eea;
-        }
-    </style>
-</head>
-<body class="bg-gray-200 flex items-center justify-center min-h-screen">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Weather App</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
+                    "Helvetica Neue", Arial;
+            }
+            .weather-card {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                transition: transform 0.25s ease, box-shadow 0.25s ease;
+            }
+            .weather-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+            }
+            .search-btn {
+                background-color: #764ba2;
+                transition: background-color 0.2s ease;
+            }
+            .search-btn:hover {
+                background-color: #667eea;
+            }
+            .visually-hidden {
+                position: absolute !important;
+                height: 1px;
+                width: 1px;
+                overflow: hidden;
+                clip: rect(1px, 1px, 1px, 1px);
+                white-space: nowrap;
+            }
+        </style>
+    </head>
 
-    <div class="w-full max-w-md mx-auto p-4">
-        <div class="flex mb-4 rounded-lg shadow-lg">
-            <input type="text" id="cityInput" class="w-full p-4 rounded-l-lg border-0 focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Enter city name...">
-            <button id="searchBtn" class="search-btn text-white px-6 py-4 rounded-r-lg">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-        
-        
-        <div id="weatherCard" class="weather-card text-white p-8 rounded-lg shadow-lg hidden">
-            <div id="loader" class="text-center hidden">
-                 <i class="fas fa-spinner fa-spin fa-3x"></i>
-                 <p class="mt-2">Fetching data...</p>
-            </div>
+    <body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+        <main class="w-full max-w-xl">
+            <header class="mb-4 text-center">
+                <h1 class="text-2xl font-bold text-gray-800">Weather App</h1>
+                <p class="text-sm text-gray-600">Search by city, use geolocation, or toggle units</p>
+            </header>
 
-            <div id="error-message" class="text-center hidden">
-                <i class="fas fa-exclamation-triangle fa-3x text-yellow-300"></i>
-                <h2 class="text-2xl font-bold mt-2">City Not Found</h2>
-                <p>Please check the spelling and try again.</p>
-            </div>
-            
-            <div id="weather-info">
-                <div class="text-center mb-6">
-                    <h1 id="cityName" class="text-4xl font-bold">--</h1>
-                    <p id="weatherDescription" class="text-lg capitalize">--</p>
+            <section class="mb-4">
+                <form id="searchForm" class="flex rounded-lg shadow-lg overflow-hidden" role="search" aria-label="Search city">
+                    <label for="cityInput" class="visually-hidden">City name</label>
+                    <input
+                        id="cityInput"
+                        name="city"
+                        type="text"
+                        autocomplete="off"
+                        class="w-full p-3 border-0 focus:ring-2 focus:ring-purple-500 outline-none"
+                        placeholder="Enter city name..."
+                        aria-label="Enter city name"
+                    />
+
+                    <button id="searchBtn" type="submit" class="search-btn text-white px-4" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+
+                    <button id="geoBtn" type="button" class="bg-white px-4" title="Use my location" aria-label="Use my location">
+                        <i class="fas fa-location-dot text-purple-700"></i>
+                    </button>
+
+                    <button id="unitToggle" type="button" class="bg-white px-4" aria-pressed="false" aria-label="Toggle units">
+                        °C
+                    </button>
+                </form>
+
+                <div id="recent" class="mt-2 text-sm text-gray-600" aria-live="polite"></div>
+            </section>
+
+            <section id="weatherCard" class="weather-card text-white p-6 rounded-lg shadow-lg hidden" aria-live="polite">
+                <div id="statusArea" class="mb-4 text-center">
+                    <div id="loader" class="hidden">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">Fetching data…</p>
+                    </div>
+
+                    <div id="error-message" class="hidden">
+                        <i class="fas fa-exclamation-triangle fa-2x text-yellow-300"></i>
+                        <h2 id="errorTitle" class="text-xl font-semibold mt-2">City Not Found</h2>
+                        <p id="errorText" class="text-sm">Please check the spelling and try again.</p>
+                    </div>
                 </div>
 
-                <div class="flex items-center justify-center mb-6">
-                    <img id="weatherIcon" src="https://placehold.co/100x100/ffffff/000000?text=ICON" alt="Weather Icon" class="w-24 h-24">
-                    <p id="temperature" class="text-7xl font-bold ml-4">--°C</p>
+                <div id="weather-info" class="space-y-4">
+                    <div class="text-center">
+                        <h1 id="cityName" class="text-3xl font-bold">--</h1>
+                        <p id="weatherDescription" class="text-sm capitalize">--</p>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-4">
+                        <img id="weatherIcon" src="https://placehold.co/100x100/ffffff/000000?text=ICON" alt="Weather icon" class="w-20 h-20" />
+                        <div>
+                            <p id="temperature" class="text-5xl font-bold">--°C</p>
+                            <p id="feelsLike" class="text-sm opacity-90">Feels like: --</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-center text-sm">
+                        <div class="bg-white/20 p-3 rounded-md">
+                            <p class="font-medium">Humidity</p>
+                            <p id="humidity" class="mt-1">--%</p>
+                        </div>
+                        <div class="bg-white/20 p-3 rounded-md">
+                            <p class="font-medium">Wind</p>
+                            <p id="windSpeed" class="mt-1">-- m/s</p>
+                        </div>
+                        <div class="bg-white/20 p-3 rounded-md">
+                            <p class="font-medium">Sunrise</p>
+                            <p id="sunrise" class="mt-1">--:--</p>
+                        </div>
+                        <div class="bg-white/20 p-3 rounded-md">
+                            <p class="font-medium">Sunset</p>
+                            <p id="sunset" class="mt-1">--:--</p>
+                        </div>
+                        <div class="bg-white/20 p-3 rounded-md">
+                            <p class="font-medium">Pressure</p>
+                            <p id="pressure" class="mt-1">-- hPa</p>
+                        </div>
+                        <div class="bg-white/20 p-3 rounded-md">
+                            <p class="font-medium">Visibility</p>
+                            <p id="visibility" class="mt-1">-- km</p>
+                        </div>
+                    </div>
                 </div>
+            </section>
+        </main>
 
-                <div class="grid grid-cols-2 gap-4 text-center">
-                    <div class="bg-white/20 p-4 rounded-lg">
-                        <p class="font-semibold text-lg"><i class="fas fa-tint mr-2"></i>Humidity</p>
-                        <p id="humidity" class="text-xl">--%</p>
-                    </div>
-                    <div class="bg-white/20 p-4 rounded-lg">
-                        <p class="font-semibold text-lg"><i class="fas fa-wind mr-2"></i>Wind Speed</p>
-                        <p id="windSpeed" class="text-xl">-- m/s</p>
-                    </div>
-                    <div class="bg-white/20 p-4 rounded-lg">
-                        <p class="font-semibold text-lg"><i class="fas fa-sunrise mr-2"></i>Sunrise</p>
-                        <p id="sunrise" class="text-xl">--:--</p>
-                    </div>
-                    <div class="bg-white/20 p-4 rounded-lg">
-                        <p class="font-semibold text-lg"><i class="fas fa-sunset mr-2"></i>Sunset</p>
-                        <p id="sunset" class="text-xl">--:--</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const apiKey = '717b64c259b63d6656a8032709d0a797';
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const apiKey = '717b64c259b63d6656a8032709d0a797';
-            
-            const cityInput = document.getElementById('cityInput');
-            const searchBtn = document.getElementById('searchBtn');
-            const weatherCard = document.getElementById('weatherCard');
-            const loader = document.getElementById('loader');
-            const errorMessage = document.getElementById('error-message');
-            const weatherInfo = document.getElementById('weather-info');
-            
-            const cityNameEl = document.getElementById('cityName');
-            const weatherDescriptionEl = document.getElementById('weatherDescription');
-            const weatherIconEl = document.getElementById('weatherIcon');
-            const temperatureEl = document.getElementById('temperature');
-            const humidityEl = document.getElementById('humidity');
-            const windSpeedEl = document.getElementById('windSpeed');
-            const sunriseEl = document.getElementById('sunrise');
-            const sunsetEl = document.getElementById('sunset');
+                const searchForm = document.getElementById("searchForm");
+                const cityInput = document.getElementById("cityInput");
+                const searchBtn = document.getElementById("searchBtn");
+                const geoBtn = document.getElementById("geoBtn");
+                const unitToggle = document.getElementById("unitToggle");
 
-            const getWeatherData = async (city) => {
-                weatherCard.classList.remove('hidden');
-                weatherInfo.classList.add('hidden');
-                errorMessage.classList.add('hidden');
-                loader.classList.remove('hidden');
+                const weatherCard = document.getElementById("weatherCard");
+                const loader = document.getElementById("loader");
+                const errorMessage = document.getElementById("error-message");
+                const errorTitle = document.getElementById("errorTitle");
+                const errorText = document.getElementById("errorText");
+                const weatherInfo = document.getElementById("weather-info");
 
-                try {
-                    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-                    const response = await fetch(apiUrl);
-                    
-                    if (!response.ok) {
-                        throw new Error('City not found');
+                const cityNameEl = document.getElementById("cityName");
+                const weatherDescriptionEl = document.getElementById("weatherDescription");
+                const weatherIconEl = document.getElementById("weatherIcon");
+                const temperatureEl = document.getElementById("temperature");
+                const feelsLikeEl = document.getElementById("feelsLike");
+                const humidityEl = document.getElementById("humidity");
+                const windSpeedEl = document.getElementById("windSpeed");
+                const sunriseEl = document.getElementById("sunrise");
+                const sunsetEl = document.getElementById("sunset");
+                const pressureEl = document.getElementById("pressure");
+                const visibilityEl = document.getElementById("visibility");
+                const recentEl = document.getElementById("recent");
+
+                let unit = localStorage.getItem("WEATHER_UNIT") || "metric";
+                updateUnitToggle();
+
+                const debounce = (fn, wait = 300) => {
+                    let t;
+                    return (...args) => {
+                        clearTimeout(t);
+                        t = setTimeout(() => fn.apply(this, args), wait);
+                    };
+                };
+
+                function showLoader() {
+                    weatherCard.classList.remove("hidden");
+                    loader.classList.remove("hidden");
+                    errorMessage.classList.add("hidden");
+                    weatherInfo.classList.add("hidden");
+                }
+
+                function hideLoader() {
+                    loader.classList.add("hidden");
+                }
+
+                function showError(title = "City Not Found", text = "Please check the spelling and try again.") {
+                    hideLoader();
+                    weatherInfo.classList.add("hidden");
+                    errorTitle.textContent = title;
+                    errorText.textContent = text;
+                    errorMessage.classList.remove("hidden");
+                    weatherCard.classList.remove("hidden");
+                }
+
+                function formatTime(ts, tzOffsetSeconds) {
+                    const date = new Date((ts + (tzOffsetSeconds || 0)) * 1000);
+                    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
+                }
+
+                function kmFromMeters(m) {
+                    return (m / 1000).toFixed(1);
+                }
+
+                function updateUnitToggle() {
+                    unitToggle.textContent = unit === "metric" ? "°C" : "°F";
+                    unitToggle.setAttribute("aria-pressed", unit === "imperial");
+                }
+
+                function saveRecent(city) {
+                    const key = "RECENT_CITIES";
+                    const raw = localStorage.getItem(key);
+                    const list = raw ? JSON.parse(raw) : [];
+                    const normalized = city.trim();
+                    if (!normalized) return;
+                    const filtered = [normalized, ...list.filter((c) => c.toLowerCase() !== normalized.toLowerCase())].slice(0, 5);
+                    localStorage.setItem(key, JSON.stringify(filtered));
+                    renderRecent();
+                }
+
+                function renderRecent() {
+                    const raw = localStorage.getItem("RECENT_CITIES");
+                    if (!raw) {
+                        recentEl.textContent = "";
+                        return;
                     }
-                    
-                    const data = await response.json();
-                    updateUI(data);
-
-                } catch (error) {
-                    showError();
-                    console.error('Error fetching weather data:', error);
-                } finally {
-                    loader.classList.add('hidden');
+                    const list = JSON.parse(raw);
+                    if (!list.length) {
+                        recentEl.textContent = "";
+                        return;
+                    }
+                    recentEl.innerHTML = `Recent: ${list.map((c) => `<button class=\"text-purple-800 underline mr-2\" data-city=\"${c}\">${c}</button>`).join("")}`;
+                    recentEl.querySelectorAll("button[data-city]").forEach((btn) => {
+                        btn.addEventListener("click", () => fetchByCity(btn.dataset.city));
+                    });
                 }
-            };
 
-            const updateUI = (data) => {
-                weatherInfo.classList.remove('hidden');
-                errorMessage.classList.add('hidden');
-                
-                cityNameEl.textContent = `${data.name}, ${data.sys.country}`;
-                weatherDescriptionEl.textContent = data.weather[0].description;
-                weatherIconEl.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-                temperatureEl.textContent = `${Math.round(data.main.temp)}°C`;
-                humidityEl.textContent = `${data.main.humidity}%`;
-                windSpeedEl.textContent = `${data.wind.speed} m/s`;
-                sunriseEl.textContent = new Date(data.sys.sunrise * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                sunsetEl.textContent = new Date(data.sys.sunset * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            };
-            
-            const showError = () => {
-                weatherInfo.classList.add('hidden');
-                errorMessage.classList.remove('hidden');
-            };
-
-            searchBtn.addEventListener('click', () => {
-                const city = cityInput.value.trim();
-                if (city) {
-                    getWeatherData(city);
+                async function fetchByCoords(lat, lon) {
+                    if (!apiKey) return showError("Missing API key", "Please set your OpenWeather API key in localStorage as OPENWEATHER_API_KEY or reload and enter it when prompted.");
+                    try {
+                        showLoader();
+                        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=${unit}`;
+                        const res = await fetch(url);
+                        if (!res.ok) {
+                            const err = await res.json().catch(() => ({}));
+                            throw new Error(err.message || "Failed to fetch");
+                        }
+                        const data = await res.json();
+                        updateUI(data);
+                        saveRecent(`${data.name}, ${data.sys.country}`);
+                    } catch (err) {
+                        console.error(err);
+                        showError("Unable to fetch", err.message || "Check console for details.");
+                    } finally {
+                        hideLoader();
+                    }
                 }
-            });
 
-            cityInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
+                async function fetchByCity(city) {
+                    if (!apiKey) return showError("Missing API key", "Please set your OpenWeather API key in localStorage as OPENWEATHER_API_KEY or reload and enter it when prompted.");
+                    if (!city || !city.trim()) return;
+                    try {
+                        showLoader();
+                        const q = encodeURIComponent(city.trim());
+                        const url = `https://api.openweathermap.org/data/2.5/weather?q=${q}&appid=${apiKey}&units=${unit}`;
+                        const res = await fetch(url);
+                        if (!res.ok) {
+                            if (res.status === 404) throw new Error("City not found");
+                            const err = await res.json().catch(() => ({}));
+                            throw new Error(err.message || "Failed to fetch");
+                        }
+                        const data = await res.json();
+                        updateUI(data);
+                        saveRecent(`${data.name}, ${data.sys.country}`);
+                    } catch (err) {
+                        console.error(err);
+                        showError("Unable to fetch", err.message || "Check console for details.");
+                    } finally {
+                        hideLoader();
+                    }
+                }
+
+                function updateUI(data) {
+                    weatherInfo.classList.remove("hidden");
+                    errorMessage.classList.add("hidden");
+                    weatherCard.classList.remove("hidden");
+
+                    const tz = data.timezone || 0;
+                    cityNameEl.textContent = `${data.name}, ${data.sys.country}`;
+                    weatherDescriptionEl.textContent = data.weather[0].description || "--";
+                    weatherIconEl.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+                    weatherIconEl.alt = data.weather[0].description || "weather";
+
+                    temperatureEl.textContent = `${Math.round(data.main.temp)}${unit === "metric" ? "°C" : "°F"}`;
+                    feelsLikeEl.textContent = `Feels like: ${Math.round(data.main.feels_like)}${unit === "metric" ? "°C" : "°F"}`;
+                    humidityEl.textContent = `${data.main.humidity}%`;
+                    windSpeedEl.textContent = `${data.wind.speed} ${unit === "metric" ? "m/s" : "mph"}`;
+                    sunriseEl.textContent = formatTime(data.sys.sunrise, tz);
+                    sunsetEl.textContent = formatTime(data.sys.sunset, tz);
+                    pressureEl.textContent = `${data.main.pressure} hPa`;
+                    visibilityEl.textContent = `${kmFromMeters(data.visibility)} km`;
+                }
+
+                searchForm.addEventListener("submit", (e) => {
+                    e.preventDefault();
                     const city = cityInput.value.trim();
-                    if (city) {
-                        getWeatherData(city);
-                    }
-                }
+                    if (city) fetchByCity(city);
+                });
+
+                geoBtn.addEventListener("click", () => {
+                    if (!navigator.geolocation) return showError("Geolocation not supported", "Your browser doesn't support geolocation.");
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => fetchByCoords(pos.coords.latitude, pos.coords.longitude),
+                        (err) => showError("Location error", err.message || "Unable to get location")
+                    );
+                });
+
+                unitToggle.addEventListener("click", () => {
+                    unit = unit === "metric" ? "imperial" : "metric";
+                    localStorage.setItem("WEATHER_UNIT", unit);
+                    updateUnitToggle();
+                    const last = JSON.parse(localStorage.getItem("RECENT_CITIES") || "[]")[0];
+                    if (last) fetchByCity(last);
+                });
+
+                renderRecent();
+
+                const lastCity = JSON.parse(localStorage.getItem("RECENT_CITIES") || "[]")[0] || "Bandung";
+                if (lastCity) fetchByCity(lastCity);
             });
-
-            getWeatherData('Bandung');
-        });
-    </script>
-
-</body>
+        </script>
+    </body>
 </html>
 
